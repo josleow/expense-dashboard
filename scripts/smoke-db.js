@@ -1,4 +1,5 @@
-require("dotenv").config({path: "../.env.local"})
+require("dotenv").config({ path: require("path").resolve(__dirname, "..", ".env.local") });
+
 const mongoose = require("mongoose")
 
 async function main(){
@@ -8,7 +9,11 @@ async function main(){
     await mongoose.connect(process.env.MONGO_URI)
     console.log("Connected to MongoDB") 
 
-    const cols=await mongoose.connection.db.listCollections().toArray()
+    const dbName = mongoose.connection.db.databaseName;
+    console.log("DB name:", dbName);
+
+    const cols = await mongoose.connection.db.listCollections().toArray();
+
     console.log("Collections in the database:", cols.map(col => col.name).join(", "))
 
     await mongoose.disconnect()
