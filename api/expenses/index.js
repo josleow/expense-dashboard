@@ -2,7 +2,7 @@ module.exports = async (req, res) => {
   try {
     // load modules INSIDE the handler so errors can be caught and returned
     const dbConnect = require("../_db");
-    const Expense = require("../../models/Expense");
+   const Expense = require("../_models/Expense");
 
     const hasUri = Boolean(process.env.MONGO_URI);
     if (!hasUri) {

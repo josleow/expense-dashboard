@@ -1,5 +1,6 @@
 const dbConnect = require("../_db");
-const Expense = require("../../models/Expense");
+const Expense = require("../_models/Expense");
+
 
 module.exports = async (req, res) => {
   await dbConnect();
