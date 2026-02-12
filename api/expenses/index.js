@@ -3,22 +3,27 @@ const Expense = require("../../models/Expense");
 
 module.exports = async (req, res) => {
   try {
+    console.log("ENV has MONGO_URI?", Boolean(process.env.MONGO_URI));
 
     await dbConnect();
 
     if (req.method === "GET") {
       const data = await Expense.find().sort({ date: -1 });
-      return res.status(200).json({ data });
+      return res.status(200).json({ ok: true, count: data.length, data });
     }
 
     if (req.method === "POST") {
       const created = await Expense.create(req.body);
       return res.status(201).json({ ok: true, created });
     }
+
+    return res.status(405).json({ ok: false, message: "Method Not Allowed" });
   } catch (err) {
-    return res.status(400).json({
-      message: err.message,
+    console.error("API ERROR:", err);
+    return res.status(500).json({
+      ok: false,
+      name: err?.name,
+      message: err?.message || String(err),
     });
   }
-  return res.status(405).json({ message: "Method not allowed" });
 };
