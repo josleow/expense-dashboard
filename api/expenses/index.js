@@ -1,9 +1,17 @@
-const dbConnect = require("../_db");
-const Expense = require("../../models/Expense");
-
 module.exports = async (req, res) => {
   try {
-    console.log("ENV has MONGO_URI?", Boolean(process.env.MONGO_URI));
+    // load modules INSIDE the handler so errors can be caught and returned
+    const dbConnect = require("../_db");
+    const Expense = require("../../models/Expense");
+
+    const hasUri = Boolean(process.env.MONGO_URI);
+    if (!hasUri) {
+      return res.status(500).json({
+        ok: false,
+        name: "MissingEnv",
+        message: "MONGO_URI is missing in Vercel Environment Variables",
+      });
+    }
 
     await dbConnect();
 
@@ -19,7 +27,6 @@ module.exports = async (req, res) => {
 
     return res.status(405).json({ ok: false, message: "Method Not Allowed" });
   } catch (err) {
-    console.error("API ERROR:", err);
     return res.status(500).json({
       ok: false,
       name: err?.name,
