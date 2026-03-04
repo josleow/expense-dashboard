@@ -1,8 +1,9 @@
 import { useState } from "react";
+import MonthlySpendLineChart from "./components/charts/MonthlySpendLineChart";
+
 
 function Tabs({ tab, setTab }) {
-  const base =
-    "px-4 py-2 rounded-xl border text-sm font-medium transition";
+  const base = "px-4 py-2 rounded-xl border text-sm font-medium transition";
   const active = "bg-gray-900 text-white border-gray-900";
   const idle = "bg-white text-gray-900 border-gray-200 hover:bg-gray-100";
 
@@ -14,6 +15,7 @@ function Tabs({ tab, setTab }) {
       >
         Expenses
       </button>
+
       <button
         className={`${base} ${tab === "dashboard" ? active : idle}`}
         onClick={() => setTab("dashboard")}
@@ -121,7 +123,20 @@ function ExpenseList({ expenses, onDelete }) {
   );
 }
 
+function groupMonthly(expenses) {
+  const map = new Map();
+  for (const e of expenses) {
+    const d = new Date(e.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    map.set(key, (map.get(key) || 0) + (Number(e.amount) || 0));
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, total]) => ({ month, total: Math.round(total * 100) / 100 }));
+}
+
 export default function App() {
+
   const [tab, setTab] = useState("expenses");
   const [expenses, setExpenses] = useState([]);
 
@@ -134,7 +149,7 @@ export default function App() {
   }
 
   const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
-
+  const monthly = groupMonthly(expenses);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* CENTERED CONTAINER */}
@@ -167,19 +182,26 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-gray-200 bg-white p-4">
-              <div className="text-sm text-gray-600">Total Expenses</div>
-              <div className="text-3xl font-bold text-gray-900 mt-1">{expenses.length}</div>
-            </div>
+<div className="grid gap-4 md:grid-cols-2">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4">
+      <div className="text-sm text-gray-600">Total Expenses</div>
+      <div className="text-3xl font-bold text-gray-900 mt-1">{expenses.length}</div>
+    </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4">
-              <div className="text-sm text-gray-600">Total Amount</div>
-              <div className="text-3xl font-bold text-gray-900 mt-1">
-                ${totalAmount.toFixed(2)}
-              </div>
-            </div>
-          </div>
+    <div className="rounded-2xl border border-gray-200 bg-white p-4">
+      <div className="text-sm text-gray-600">Total Amount</div>
+      <div className="text-3xl font-bold text-gray-900 mt-1">
+        ${totalAmount.toFixed(2)}
+      </div>
+    </div>
+
+    <div className="md:col-span-2 rounded-2xl border border-gray-200 bg-white p-4">
+      <div className="text-sm font-medium text-gray-700 mb-2">
+        Monthly Spend Trend
+      </div>
+      <MonthlySpendLineChart data={monthly} />
+    </div>
+  </div>
         )}
 
       </div>
